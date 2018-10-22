@@ -20,3 +20,4 @@ In order to terminate the script (== close all windows opened by OpenCV), press 
 ### Image processing resources (update this list when you find something useful):
 * [OpenCV documentation](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_tutorials.html)
 * [Python + OpenCV: OCR Image Segmentation](https://stackoverflow.com/questions/40443988/python-opencv-ocr-image-segmentation)
+* [Split text lines in scanned document](https://stackoverflow.com/questions/34981144/split-text-lines-in-scanned-document)
