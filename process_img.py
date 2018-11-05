@@ -4,17 +4,42 @@ import cv2
 
 # main image processing function
 def process(path):
-    img = cv2.imread(path, 0)
+    # (1) read
+    gray = cv2.imread(path, 0)
 
-    ret,img2 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
+    # (2) threshold
+    th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
 
-    # kernel = np.ones((5,5), np.uint8)
-    kernel = np.matrix('0 0 0; 1 1 1; 0 0 0', np.uint8)
-    img3 = cv2.dilate(img2, kernel, iterations=3)
-    img4 = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+    # (3) minAreaRect on the nozeros
+    pts = cv2.findNonZero(threshed)
+    ret = cv2.minAreaRect(pts)
 
-    cv2.imshow('view', img3)
+    (cx, cy), (w, h), ang = ret
+    if w > h:
+        w, h = h, w
+        ang += 90
 
+    # (4) Find rotated matrix, do rotation
+    M = cv2.getRotationMatrix2D((cx, cy), ang, 1.0)
+    rotated = cv2.warpAffine(threshed, M, (img.shape[1], img.shape[0]))
+
+    # (5) find and draw the upper and lower boundary of each lines
+    hist = cv2.reduce(rotated, 1, cv2.REDUCE_AVG).reshape(-1)
+
+    th = 2
+    H, W = img.shape[:2]
+    uppers = [y for y in range(H - 1) if hist[y] <= th and hist[y + 1] > th]
+    lowers = [y for y in range(H - 1) if hist[y] > th and hist[y + 1] <= th]
+
+    rotated = cv2.cvtColor(rotated, cv2.COLOR_GRAY2BGR)
+    for y in uppers:
+        cv2.line(rotated, (0, y), (W, y), (255, 0, 0), 1)
+
+    for y in lowers:
+        cv2.line(rotated, (0, y), (W, y), (0, 255, 0), 1)
+
+    # cv2.imwrite("result.png", rotated)
+    cv2.imshow('result', rotated)
 
 
 # when run as a script, the image path comes from a command line argument
