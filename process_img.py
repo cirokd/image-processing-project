@@ -5,7 +5,8 @@ import cv2
 # main image processing function
 def process(path):
     # (1) read
-    gray = cv2.imread(path, 0)
+    img = cv2.imread(path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # (2) threshold
     th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
