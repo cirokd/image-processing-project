@@ -22,8 +22,24 @@ def process(path, lineCloseKernelWidth = 40, paragraphCloseKernelHeight = 10):
 
     # (4) Find rotated matrix, do rotation
     M = cv2.getRotationMatrix2D((cx, cy), ang, 1.0)
-    rotated = cv2.warpAffine(threshed, M, (img.shape[1], img.shape[0]))
-    rotatedOriginal = cv2.warpAffine(img, M, (img.shape[1], img.shape[0]))
+    rotated = cv2.warpAffine(threshed, M, (img.shape[1], img.shape[0]), borderValue=255)
+    rotatedOriginal = cv2.warpAffine(img, M, (img.shape[1], img.shape[0]), borderValue=255)
+
+    # (4.1) Add bounding boxes
+    kernel = np.ones((5,1),np.uint8)
+    gray = cv2.morphologyEx(rotated, cv2.MORPH_OPEN, kernel)
+    # threshold image
+    ret, threshed_img = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    # find contours and get the external one
+    image, contours, hier = cv2.findContours(threshed_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_L1)
+
+    # with each contour, draw boundingRect in red
+    for c in contours:
+        # get the bounding rect
+        x, y, w, h = cv2.boundingRect(c)
+        # draw a green rectangle to visualize the bounding rect
+        cv2.rectangle(rotatedOriginal, (x, y), (x + w, y + h), (0, 0, 255), 1)
+    
 
     # (5) perform a morph. close to segment the lines
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (lineCloseKernelWidth,1))
