@@ -52,14 +52,15 @@ def process(
             # draw a green rectangle to visualize the bounding rect
             cv2.rectangle(rotatedOriginal, (x, y), (x + w, y + h), (0, 0, 255), 1)
 
-    if (flags['lines']):
-        # (6) perform a morph. close to segment the lines
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (lineCloseKernelWidth,1))
-        closed = cv2.morphologyEx(rotated, cv2.MORPH_CLOSE, kernel)
-        ret, contours, hierarchy = cv2.findContours(closed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        for cnt in contours:
-            x,y,w,h = cv2.boundingRect(cnt)
-            cv2.rectangle(ret,(x,y),(x+w,y+h),(255,255,255),-1)
+
+    # (6) perform a morph. close to segment the lines
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (lineCloseKernelWidth,1))
+    closed = cv2.morphologyEx(rotated, cv2.MORPH_CLOSE, kernel)
+    ret, contours, hierarchy = cv2.findContours(closed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        x,y,w,h = cv2.boundingRect(cnt)
+        cv2.rectangle(ret,(x,y),(x+w,y+h),(255,255,255),-1)
+        if (flags['lines']):
             cv2.rectangle(rotatedOriginal,(x,y),(x+w,y+h),(0,255,0),2)
 
     if (flags['paragraphs']):
